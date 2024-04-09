@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig authType="PASSWORD" host="helios.se.ifmo.ru" id="cfaf6e80-cb1b-49d0-a8e9-13e9f7a523f0" port="2222" nameFormat="DESCRIPTIVE" username="s368575" useOpenSSHConfig="true" />
+    </configs>
+  </component>
+</project>

@@ -1,0 +1,105 @@
+<ui:composition template="WEB-INF/templates/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:param name="linkValue" value="На главную"/>
+    <ui:param name="linkOutcome" value="start"/>
+
+    <ui:define name="title">Лабораторная работа №3</ui:define>
+
+    <ui:define name="content">
+        <h:outputScript name="js/plot.js" target="head"/>
+        <h:outputScript target="head">
+            lastR = #{pointBean.lastR};
+            points = [
+            <ui:repeat value="#{pointBean.list}" var="point" varStatus="loop">
+                {
+                    x: #{point.x},
+                    y: #{point.y},
+                    r: #{point.r},
+                    inside: #{point.inside}
+                }#{loop.end ? "" : ","}
+            </ui:repeat>
+            ];
+        </h:outputScript>
+
+        <div class="container flex-column">
+            <h3>Попадание точки на координатной плоскости в заданную область</h3>
+            <hr/>
+            <h:panelGrid columns="2" cellpadding="7">
+                <h:form id="rChecksForm">
+                    <h:panelGrid id="submitPanel" columns="1">
+                        <h:panelGrid id="inputPanel" columns="2" >
+                            <h:outputLabel for="xCoord" value="Введите X:"/>
+                            <p:inputNumber id="xCoord" minValue="-5" maxValue="5" value="#{pointBean.x}" widgetVar="xCoord"
+                                           required="true" placeholder="значение в промежутке (-5...5)"
+                                           requiredMessage="Введите значение X в промежутке (-5...5)!"/>
+
+                            <h:outputLabel for="yCoord" value="Выберите Y:"/>
+                            <h:panelGrid>
+                                <p:selectOneButton id="yCoord" value="#{pointBean.y}" widgetVar="yCoord"
+                                                   required="true" requiredMessage="Выберите значение Y!">
+                                    <f:selectItems value="#{pointBean.YRange}"/>
+                                </p:selectOneButton>
+                                <p:inputNumber type="hidden" value="#{pointBean.YMouse}" widgetVar="yCoordHidden"/>
+                            </h:panelGrid>
+
+                            <h:outputLabel value="Выберите R:"/>
+                            <h:panelGrid id="checksPanel" columns="5">
+                                <ui:repeat value="#{pointBean.RRange}" var="rVar">
+                                    <p:selectBooleanCheckbox widgetVar="rValue#{rVar}" value="#{pointBean.RMap[rVar - 1]}"
+                                                             label="Выберите R:" itemLabel="#{rVar}">
+                                        <p:ajax update="rChecksForm:checksPanel" listener="#{pointBean.setR(rVar)}"
+                                                oncomplete="drawPlot(#{rVar});"/>
+                                    </p:selectBooleanCheckbox>
+                                </ui:repeat>
+                            </h:panelGrid>
+                        </h:panelGrid>
+
+                        <p:messages id="messages" showDetail="false" showIcon="false" closable="true">
+                            <p:autoUpdate/>
+                        </p:messages>
+
+                        <p:commandButton id="submitButton" value="Проверить" icon="pi pi-check"
+                                         action="#{pointBean.create}" ajax="false"/>
+                    </h:panelGrid>
+                </h:form>
+                <svg class="bordered" xmlns="http://www.w3.org/2000/svg"
+                     height="350" width="350" viewBox="0 0 600 600">
+                </svg>
+            </h:panelGrid>
+            <hr/>
+            <h:form id="table_form">
+                <h:dataTable styleClass="bordered results" value="#{pointBean.list}" var="point">
+                    <h:column>
+                        <f:facet name="header">X</f:facet>
+                        #{point.x}
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Y</f:facet>
+                        #{point.y}
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">R</f:facet>
+                        #{point.r}
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Попадание</f:facet>
+                        <h:outputText style="color: #{point.inside ? 'green' : 'red'}" value="#{point.inside}"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Время</f:facet>
+                        #{point.dateTime}
+                    </h:column>
+                </h:dataTable>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>
