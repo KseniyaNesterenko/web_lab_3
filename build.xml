@@ -1,0 +1,48 @@
+<project name="WebProgrammingLab" default="build" basedir=".">
+    <property file="build.properties"/>
+
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+
+    <!-- Цель для компиляции -->
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}" destdir="${build.dir}"/>
+    </target>
+
+    <!-- Цель для сборки jar -->
+    <target name="build" depends="compile">
+        <jar destfile="${jar.file}" basedir="${build.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}"/>
+                <attribute name="Version" value="${version}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <!-- Цель для очистки проекта -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <!-- Цель для тестирования -->
+    <target name="test" depends="build">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit printsummary="yes" haltonfailure="yes">
+            <formatter type="xml"/>
+            <classpath>
+                <pathelement path="${jar.file}"/>
+                <pathelement path="${junit.jar}"/>
+            </classpath>
+            <batchtest fork="yes" todir="${junit.output.dir}">
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test*.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+    <!-- А потом ещё цели(  -->
+</project>
