@@ -45,7 +45,9 @@
     </target>
 
     <!-- Цель для преобразования файлов локализации -->
-
+    <target name="native2ascii">
+        <native2ascii src="${src.dir}/locales" dest="${build.dir}/locales" encoding="UTF-8"/>
+    </target>
 
     <!-- Цель для валидации XML файлов -->
     <target name="xml">
@@ -57,3 +59,4 @@
     </target>
 
 </project>
+
