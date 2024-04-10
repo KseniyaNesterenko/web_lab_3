@@ -1,19 +1,35 @@
-<project name="WebProgrammingLab" default="build" basedir=".">
+<project name="WebProgrammingLab" default="build" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
     <property file="build.properties"/>
+    <available classname="org.apache.ivy.Main" property="ivy.installed"/>
+
+    <!-- установка Ivy, если нет -->
+    <target name="install-ivy" description="Install ivy" unless="ivy.installed">
+        <mkdir dir="${user.home}/.ant/lib"/>
+        <get dest="${user.home}/.ant/lib/ivy.jar" src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/2.3.0/ivy-2.3.0.jar"/>
+        <fail message="Ivy has been installed. Run the build again"/>
+    </target>
+
+    <!-- подгрузка недостающих модулей -->
+    <target name="resolve" depends="install-ivy">
+        <ivy:resolve/>
+        <ivy:cachepath pathid="compile.path"/>
+    </target>
 
     <target name="init">
-        <mkdir dir="${build.dir}"/>
-        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${dir.build}"/>
+        <mkdir dir="${dir.dist}"/>
+        <mkdir dir="${dir.lib}"/>
     </target>
 
     <!-- Цель для компиляции -->
-    <target name="compile" depends="init">
-        <javac srcdir="${src.dir}" destdir="${build.dir}"/>
+    <target name="compile" depends="init,resolve">
+        <mkdir dir="${dir.build.classes}"/>
+        <javac srcdir="${dir.src}" destdir="${dir.build}" classpathref="compile.path" includeantruntime="false"/>
     </target>
 
     <!-- Цель для сборки jar -->
-    <target name="build" depends="compile">
-        <jar destfile="${jar.file}" basedir="${build.dir}">
+    <target name="create-jar" depends="compile">
+        <jar destfile="${jar.file}" basedir="${dir.build.classes}">
             <manifest>
                 <attribute name="Main-Class" value="${main.class}"/>
                 <attribute name="Version" value="${version}"/>
@@ -21,10 +37,24 @@
         </jar>
     </target>
 
+    <!-- Цель для сборки war -->
+    <target name="create-war">
+        <war destfile="${war.file}" webxml="${webInf.dir}/web.xml">
+            <fileset dir="${dir.build.classes}" includes="**/*"/>
+            <lib dir="${dir.lib}"/>
+        </war>
+    </target>
+
+    <target name="build" depends="create-jar, create-war"/>
+
+    <target name="run" depends="build">
+        <java jar="${jar.file}" fork="true"/>
+    </target>
+
     <!-- Цель для очистки проекта -->
     <target name="clean">
-        <delete dir="${build.dir}"/>
-        <delete dir="${dist.dir}"/>
+        <delete dir="${dir.build}"/>
+        <delete dir="${dir.dist}"/>
     </target>
 
     <!-- Цель для тестирования -->
@@ -37,7 +67,7 @@
                 <pathelement location="${junit.jar}"/>
             </classpath>
             <batchtest todir="${junit.output.dir}">
-                <fileset dir="${test.dir}">
+                <fileset dir="${dir.test}">
                     <include name="**/*Test*.java"/>
                 </fileset>
             </batchtest>
@@ -59,4 +89,3 @@
     </target>
 
 </project>
-
