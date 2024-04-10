@@ -33,10 +33,10 @@
         <junit printsummary="yes" haltonfailure="yes">
             <formatter type="xml"/>
             <classpath>
-                <pathelement path="${jar.file}"/>
-                <pathelement path="${junit.jar}"/>
+                <pathelement location="${jar.file}"/>
+                <pathelement location="${junit.jar}"/>
             </classpath>
-            <batchtest fork="yes" todir="${junit.output.dir}">
+            <batchtest todir="${junit.output.dir}">
                 <fileset dir="${test.dir}">
                     <include name="**/*Test*.java"/>
                 </fileset>
@@ -44,5 +44,16 @@
         </junit>
     </target>
 
-    <!-- А потом ещё цели(  -->
+    <!-- Цель для преобразования файлов локализации -->
+
+
+    <!-- Цель для валидации XML файлов -->
+    <target name="xml">
+        <xmlvalidate>
+            <fileset dir="${src.dir}/xml">
+                <include name="**/*.xml"/>
+            </fileset>
+        </xmlvalidate>
+    </target>
+
 </project>
