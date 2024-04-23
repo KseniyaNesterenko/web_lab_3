@@ -2,32 +2,32 @@
     <property file="build.properties"/>
     <available classname="org.apache.ivy.Main" property="ivy.installed"/>
 
-    <!-- установка Ivy, если нет -->
+    <!-- установка Ivy, если нет (done)-->
     <target name="install-ivy" description="Install ivy" unless="ivy.installed">
         <mkdir dir="${user.home}/.ant/lib"/>
         <get dest="${user.home}/.ant/lib/ivy.jar" src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/2.3.0/ivy-2.3.0.jar"/>
         <fail message="Ivy has been installed. Run the build again"/>
     </target>
 
-    <!-- подгрузка недостающих модулей -->
+    <!-- подгрузка недостающих модулей (done)-->
     <target name="resolve" depends="install-ivy">
         <ivy:resolve/>
         <ivy:cachepath pathid="compile.path"/>
     </target>
 
     <target name="init">
-        <mkdir dir="${dir.build}"/>
+        <mkdir dir="${build}"/>
         <mkdir dir="${dir.dist}"/>
         <mkdir dir="${dir.lib}"/>
     </target>
 
-    <!-- Цель для компиляции -->
+    <!-- Цель для компиляции (done)-->
     <target name="compile" depends="init,resolve">
         <mkdir dir="${dir.build.classes}"/>
-        <javac srcdir="${dir.src}" destdir="${dir.build}" classpathref="compile.path" includeantruntime="false"/>
+        <javac srcdir="${src.main}" destdir="${dir.build.classes}" classpathref="compile.path" includeantruntime="false"/>
     </target>
 
-    <!-- Цель для сборки jar -->
+    <!-- Цель для сборки jar (done)-->
     <target name="create-jar" depends="compile">
         <jar destfile="${jar.file}" basedir="${dir.build.classes}">
             <manifest>
@@ -37,27 +37,29 @@
         </jar>
     </target>
 
-    <!-- Цель для сборки war -->
-    <target name="create-war">
+    <!-- Цель для сборки war (done)-->
+    <target name="create-war" depends="compile">
         <war destfile="${war.file}" webxml="${webInf.dir}/web.xml">
             <fileset dir="${dir.build.classes}" includes="**/*"/>
             <lib dir="${dir.lib}"/>
         </war>
     </target>
 
+    <!-- Сборка jar и war (done) -->
     <target name="build" depends="create-jar, create-war"/>
 
+    <!-- Запуск Jar-файла (done) -->
     <target name="run" depends="build">
         <java jar="${jar.file}" fork="true"/>
     </target>
 
-    <!-- Цель для очистки проекта -->
+    <!-- Цель для очистки проекта (done) -->
     <target name="clean">
-        <delete dir="${dir.build}"/>
+        <delete dir="${build}"/>
         <delete dir="${dir.dist}"/>
     </target>
 
-    <!-- Цель для тестирования -->
+    <!-- Цель для тестирования (todo: написать тесты)-->
     <target name="test" depends="build">
         <mkdir dir="${junit.output.dir}"/>
         <junit printsummary="yes" haltonfailure="yes">
@@ -74,18 +76,90 @@
         </junit>
     </target>
 
-    <!-- Цель для преобразования файлов локализации -->
+    <!-- Цель для преобразования файлов локализации (todo: добавить строки для локализации)-->
     <target name="native2ascii">
-        <native2ascii src="${src.dir}/locales" dest="${build.dir}/locales" encoding="UTF-8"/>
+        <native2ascii src="${dir.src}/locales" dest="${build}/locales" encoding="UTF-8"/>
     </target>
 
-    <!-- Цель для валидации XML файлов -->
+    <!-- Цель для валидации XML файлов (todo: протестировать)-->
     <target name="xml">
         <xmlvalidate>
-            <fileset dir="${src.dir}/xml">
+            <fileset dir="${dir.src}/xml">
                 <include name="**/*.xml"/>
             </fileset>
         </xmlvalidate>
+    </target>
+
+    <!-- Цель для перемещения собранного проекта по scp (todo: протестировать)-->
+    <target name="scp" depends="build">
+        <exec executable="scp" failonerror="true">
+            <arg value="-r"/>
+            <arg value="${build}/${jar.file}"/>
+            <arg value="${remote.username}@${remote.host}:${remote.dir}"/>
+        </exec>
+    </target>
+
+    <!-- Цель для взаимодействия с svn (todo: протестировать)-->
+    <target name="team" depends="build">
+        <svn>
+            <checkout url="${svn.url}" revision="${revision1}" destPath="revision1"/>
+            <checkout url="${svn.url}" revision="${revision2}" destPath="revision2"/>
+        </svn>
+
+        <antcall target="build">
+            <param name="dir.src" value="revision1"/>
+        </antcall>
+        <antcall target="build">
+            <param name="dir.src" value="revision2"/>
+        </antcall>
+
+        <zip destfile="${zip.file}">
+            <fileset dir="${dir.build}" includes="*.jar"/>
+        </zip>
+    </target>
+
+    <!-- Цель для определения измененных файлов (todo: протестировать)-->
+    <target name="check-changes">
+        <exec executable="svn">
+            <arg line="status -q" />
+            <redirector>
+                <outputfilterchain>
+                    <!-- Фильтр для получения только имен измененных файлов -->
+                    <linecontains>
+                        <contains value="M" />
+                    </linecontains>
+                    <propertyref name="${changed.files.property}" />
+                </outputfilterchain>
+            </redirector>
+        </exec>
+    </target>
+
+    <!-- Цель для коммита изменений (todo: протестировать)-->
+    <target name="commit" depends="check-changes">
+        <svn>
+            <commit
+                    svnpath="${svn.executable}"
+                    username="${svn.username}"
+                    password="${svn.password}"
+                    message="${commit.message}"
+                    failonerror="true">
+                <fileset dir="${basedir}" includes="${changed.files}" />
+            </commit>
+        </svn>
+    </target>
+
+    <!-- Задача для добавления и коммита отчета в Git (todo: протестировать)-->
+    <target name="commit-report" depends="test">
+        <exec executable="${git.executable}">
+            <arg value="add" />
+            <arg value="${junit.report.file}" />
+        </exec>
+
+        <exec executable="${git.executable}">
+            <arg value="commit" />
+            <arg value="-m" />
+            <arg value="${commit.message}" />
+        </exec>
     </target>
 
 </project>
