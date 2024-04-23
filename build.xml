@@ -59,34 +59,37 @@
         <delete dir="${dir.dist}"/>
     </target>
 
-    <!-- Цель для тестирования (todo: написать тесты)-->
-    <target name="test" depends="build">
+    <!-- Цель для компиляции тестов (done)-->
+    <target name="compile-tests" depends="init,resolve">
+        <javac srcdir="${dir.src.test}" destdir="${dir.build.classes}" classpathref="compile.path" includeantruntime="false"/>
+    </target>
+
+    <!-- Цель для тестирования (todo: не работает)-->
+    <target name="test" depends="build, compile-tests">
         <mkdir dir="${junit.output.dir}"/>
-        <junit printsummary="yes" haltonfailure="yes">
+        <junit printsummary="yes" haltonfailure="yes" showoutput="yes">
             <formatter type="xml"/>
             <classpath>
                 <pathelement location="${jar.file}"/>
                 <pathelement location="${junit.jar}"/>
             </classpath>
-            <batchtest todir="${junit.output.dir}">
-                <fileset dir="${dir.test}">
+            <batchtest todir="${junit.output.dir}" fork="yes">
+                <fileset dir="${dir.src.test}">
                     <include name="**/*Test*.java"/>
                 </fileset>
             </batchtest>
         </junit>
     </target>
 
-    <!-- Цель для преобразования файлов локализации (todo: добавить строки для локализации)-->
+    <!-- Цель для преобразования файлов локализации (todo: мб добавить какие-то строки для локализации)-->
     <target name="native2ascii">
-        <native2ascii src="${dir.src}/locales" dest="${build}/locales" encoding="UTF-8"/>
+        <native2ascii encoding="UTF-8" src="${dir.src}" dest="${build}" includes="**/*.properties" />
     </target>
 
-    <!-- Цель для валидации XML файлов (todo: протестировать)-->
-    <target name="xml">
-        <xmlvalidate>
-            <fileset dir="${dir.src}/xml">
-                <include name="**/*.xml"/>
-            </fileset>
+    <!-- Цель для валидации XML файлов (done) -->
+    <target name="validate-xml" depends="init">
+        <xmlvalidate failonerror="no" lenient="false">
+            <fileset dir="${dir.src}" includes="**/*.xml" />
         </xmlvalidate>
     </target>
 
