@@ -152,16 +152,20 @@
     </target>
 
     <!-- Задача для добавления и коммита отчета в Git (todo: протестировать)-->
-    <target name="commit-report" depends="test">
+    <target name="report" depends="test">
+        <mkdir dir="${junit.output.dir}"/>
+
+        <!-- Добавить отчетов JUnit в Git -->
         <exec executable="${git.executable}">
-            <arg value="add" />
-            <arg value="${junit.report.file}" />
+            <arg value="add"/>
+            <arg value="${junit.output.dir}/TEST-*.xml"/>
         </exec>
 
+        <!-- Коммит -->
         <exec executable="${git.executable}">
-            <arg value="commit" />
-            <arg value="-m" />
-            <arg value="${commit.message}" />
+            <arg value="commit"/>
+            <arg value="-m"/>
+            <arg value="Отчёт тестов JUnit"/>
         </exec>
     </target>
 
