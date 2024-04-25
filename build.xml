@@ -67,7 +67,7 @@
     </target>
 
     <!-- Цель для компиляции тестов (done)-->
-    <target name="compile-tests" depends="init,compile">
+    <target name="compile-tests" depends="build">
         <javac srcdir="${dir.src.test}" destdir="${dir.build.classes}" classpathref="compile.path" includeantruntime="false"/>
     </target>
 
@@ -116,22 +116,42 @@
         <echo message="Project successfully deployed to Helios!"/>
     </target>
 
-    <!-- Цель для взаимодействия с svn (todo: протестировать)-->
+    <!-- Цель для взаимодействия с svn (done)-->
     <target name="team" depends="build">
-        <svn>
-            <checkout url="${svn.url}" revision="${revision1}" destPath="revision1"/>
-            <checkout url="${svn.url}" revision="${revision2}" destPath="revision2"/>
-        </svn>
+        <exec executable="svn">
+            <arg line="update"/>
+        </exec>
+
+        <exec executable="svn">
+            <arg line="checkout"/>
+            <arg line="${svn.repository.url}"/>
+            <arg line="--revision"/>
+            <arg line="HEAD:1"/>
+            <arg line="revision1"/>
+        </exec>
 
         <antcall target="build">
-            <param name="dir.src" value="revision1"/>
+            <param name="dir.src" value="${dir.build.team}/rev1"/>
+            <param name="jar.file" value="${dir.build.team}/revision1.jar"/>
+            <param name="build" value="${dir.build.team}"/>
         </antcall>
+
+        <exec executable="svn">
+            <arg line="checkout"/>
+            <arg line="${svn.repository.url}"/>
+            <arg line="--revision"/>
+            <arg line="HEAD:2"/>
+            <arg line="revision2"/>
+        </exec>
+
         <antcall target="build">
-            <param name="dir.src" value="revision2"/>
+            <param name="dir.src" value="${dir.build.team}/rev2"/>
+            <param name="jar.file" value="${dir.build.team}/revision2.jar"/>
+            <param name="build" value="${dir.build.team}"/>
         </antcall>
 
         <zip destfile="${zip.file}">
-            <fileset dir="${dir.build}" includes="*.jar"/>
+            <fileset dir="${dir.build.team}" includes="**/*.jar"/>
         </zip>
     </target>
 
