@@ -2,6 +2,13 @@
     <property file="build.properties"/>
     <available classname="org.apache.ivy.Main" property="ivy.installed"/>
 
+    <path id="test.classpath">
+        <pathelement path="dist"/>
+        <pathelement path="${dir.build.classes}"/>
+        <pathelement path="${dir.build.tests}"/>
+        <fileset dir="${ant.home}/lib" includes="*.jar" />
+    </path>
+
     <!-- установка Ivy, если нет (done)-->
     <target name="install-ivy" description="Install ivy" unless="ivy.installed">
         <mkdir dir="${user.home}/.ant/lib"/>
@@ -11,12 +18,13 @@
 
     <!-- подгрузка недостающих модулей (done)-->
     <target name="resolve" depends="install-ivy">
-        <ivy:resolve/>
+        <ivy:resolve />
         <ivy:cachepath pathid="compile.path"/>
     </target>
 
     <target name="init">
         <mkdir dir="${build}"/>
+        <mkdir dir="${dir.build.classes}"/>
         <mkdir dir="${dir.dist}"/>
         <mkdir dir="${dir.lib}"/>
     </target>
@@ -65,20 +73,41 @@
     </target>
 
     <!-- Цель для тестирования (todo: не работает)-->
-    <target name="test" depends="build, compile-tests">
-        <mkdir dir="${junit.output.dir}"/>
-        <junit printsummary="yes" haltonfailure="yes" showoutput="yes">
-            <formatter type="xml"/>
+<!--    <target name="test" depends="build, compile-tests">-->
+<!--        <mkdir dir="${junit.output.dir}"/>-->
+<!--        <junit printsummary="yes" haltonfailure="yes" showoutput="yes">-->
+<!--            <formatter type="xml"/>-->
+<!--            <classpath>-->
+<!--                <pathelement location="${jar.file}"/>-->
+<!--                <pathelement location="${junit.jar}"/>-->
+<!--            </classpath>-->
+<!--            <batchtest todir="${junit.output.dir}" fork="yes">-->
+<!--                <fileset dir="${dir.src.test}">-->
+<!--                    <include name="**/*Test*.java"/>-->
+<!--                </fileset>-->
+<!--            </batchtest>-->
+<!--        </junit>-->
+<!--    </target>-->
+
+    <target name="test" depends="compile-tests">
+        <junitlauncher>
             <classpath>
-                <pathelement location="${jar.file}"/>
-                <pathelement location="${junit.jar}"/>
+                <pathelement path="${dir.build.classes}"/>
+                <pathelement path="${dir.build.tests}"/>
+                <fileset dir="${ant.home}/lib" includes="*.jar" />
+                <path refid="compile.path" />
+                <path refid="test.classpath" />
             </classpath>
-            <batchtest todir="${junit.output.dir}" fork="yes">
-                <fileset dir="${dir.src.test}">
-                    <include name="**/*Test*.java"/>
+            <testclasses outputdir="${junit.output.dir}">
+                <fileset dir="${dir.build.classes}"/>
+                <fileset dir="${dir.build.tests}">
+                    <include name="**/*.class"/>
                 </fileset>
-            </batchtest>
-        </junit>
+                <listener type="legacy-brief" sendSysOut="true"/>
+                <listener type="legacy-xml" sendSysErr="true" sendSysOut="true"/>
+                <fork />
+            </testclasses>
+        </junitlauncher>
     </target>
 
     <!-- Цель для преобразования файлов локализации (todo: мб добавить какие-то строки для локализации)-->
@@ -93,7 +122,7 @@
         </xmlvalidate>
     </target>
 
-    <!-- Цель для перемещения собранного проекта по scp (todo: протестировать)-->
+    <!-- Цель для перемещения собранного проекта по scp (todo: посмотреть пример команды на гелиос и написать аргументы по аналогии)-->
     <target name="scp" depends="build">
         <exec executable="scp" failonerror="true">
             <arg value="-r"/>

@@ -10,7 +10,12 @@
         <dependency org="jakarta.transaction" name="jakarta.transaction-api" rev="2.0.1"/>
         <dependency org="jakarta.ejb" name="jakarta.ejb-api" rev="4.0.1"/>
         <dependency org="org.projectlombok" name="lombok" rev="1.18.32"/>
-        <dependency org="org.junit.jupiter" name="junit-jupiter" rev="5.8.1"/>
-
+        <dependency org="org.junit.jupiter" name="junit-jupiter" rev="5.7.0"/>
+        <dependency org="org.junit.jupiter" name="junit-jupiter-api" rev="5.7.0"/>
+        <dependency org="org.junit.jupiter" name="junit-jupiter-engine" rev="5.7.0"/>
+        <dependency org="org.junit.platform" name="junit-platform-commons" rev="1.8.2"/>
+        <dependency org="org.junit.platform" name="junit-platform-engine" rev="1.8.2"/>
+        <dependency org="org.junit.platform" name="junit-platform-launcher" rev="1.8.2"/>
+        <dependency org="org.opentest4j" name="opentest4j" rev="1.2.0"/>
     </dependencies>
 </ivy-module>
