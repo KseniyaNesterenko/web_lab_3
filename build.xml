@@ -49,7 +49,6 @@
     <target name="create-war" depends="compile">
         <war destfile="${war.file}" webxml="${webInf.dir}/web.xml">
             <fileset dir="${dir.build.classes}" includes="**/*"/>
-            <lib dir="${dir.lib}"/>
         </war>
     </target>
 
@@ -94,7 +93,7 @@
         </junitlauncher>
     </target>
 
-    <!-- Цель для преобразования файлов локализации (todo: мб добавить какие-то строки для локализации)-->
+    <!-- Цель для преобразования файлов локализации (done)-->
     <target name="native2ascii">
         <native2ascii encoding="UTF-8" src="${dir.src}" dest="${build}" includes="**/*.properties" />
     </target>
@@ -106,13 +105,15 @@
         </xmlvalidate>
     </target>
 
-    <!-- Цель для перемещения собранного проекта по scp (todo: посмотреть пример команды на гелиос и написать аргументы по аналогии)-->
+    <!-- Цель для перемещения собранного проекта по scp (done)-->
     <target name="scp" depends="build">
-        <exec executable="scp" failonerror="true">
-            <arg value="-r"/>
-            <arg value="${build}/${jar.file}"/>
-            <arg value="${remote.username}@${remote.host}:${remote.dir}"/>
+        <exec executable="scp" failonerror="true" outputproperty="scp.output">
+            <arg value="-P"/>
+            <arg value="${scp.port}"/>
+            <arg value="${war.file}"/>
+            <arg value="${scp.user}@${scp.host}:~/${scp.dir}"/>
         </exec>
+        <echo message="Project successfully deployed to Helios!"/>
     </target>
 
     <!-- Цель для взаимодействия с svn (todo: протестировать)-->
