@@ -1,6 +1,11 @@
 <project name="WebProgrammingLab" default="build" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
     <property file="build.properties"/>
     <available classname="org.apache.ivy.Main" property="ivy.installed"/>
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="ant-contrib-1.0b3.jar" />
+        </classpath>
+    </taskdef>
 
     <path id="test.classpath">
         <pathelement path="dist"/>
@@ -155,34 +160,33 @@
         </zip>
     </target>
 
-    <!-- Цель для определения измененных файлов (todo: протестировать)-->
-    <target name="check-changes">
-        <exec executable="svn">
-            <arg line="status -q" />
-            <redirector>
-                <outputfilterchain>
-                    <!-- Фильтр для получения только имен измененных файлов -->
-                    <linecontains>
-                        <contains value="M" />
-                    </linecontains>
-                    <propertyref name="${changed.files.property}" />
-                </outputfilterchain>
-            </redirector>
+    <!-- Цель для определения измененных файлов (done)-->
+    <target name="diff">
+        <exec executable="svn" outputproperty="diff">
+            <arg line="status"/>
         </exec>
+        <for param="name" list="${svn.names}" delimiter=" ">
+            <sequential>
+                <condition property="check">
+                    <contains string="${diff}" substring="@{name}.java"/>
+                </condition>
+            </sequential>
+        </for>
+        <antcall target="commit"/>
     </target>
 
-    <!-- Цель для коммита изменений (todo: протестировать)-->
-    <target name="commit" depends="check-changes">
-        <svn>
-            <commit
-                    svnpath="${svn.executable}"
-                    username="${svn.username}"
-                    password="${svn.password}"
-                    message="${commit.message}"
-                    failonerror="true">
-                <fileset dir="${basedir}" includes="${changed.files}" />
-            </commit>
-        </svn>
+    <!-- Цель для коммита изменений (done)-->
+    <target name="commit" if="${check}">
+        <exec executable="svn">
+            <arg line="add"/>
+            <arg value="*"/>
+            <arg value="--force"/>
+        </exec>
+
+        <exec executable="svn">
+            <arg line="commit"/>
+            <arg line="-m 'auto commit'"/>
+        </exec>
     </target>
 
     <!-- Задача для добавления и коммита отчета в Git (done)-->
@@ -202,5 +206,4 @@
             <arg value="Отчёт тестов JUnit"/>
         </exec>
     </target>
-
 </project>

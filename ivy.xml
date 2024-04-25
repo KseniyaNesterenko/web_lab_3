@@ -17,5 +17,6 @@
         <dependency org="org.junit.platform" name="junit-platform-engine" rev="1.8.2"/>
         <dependency org="org.junit.platform" name="junit-platform-launcher" rev="1.8.2"/>
         <dependency org="org.opentest4j" name="opentest4j" rev="1.2.0"/>
+        <dependency org="ant-contrib" name="ant-contrib" rev="1.0b3"/>
     </dependencies>
 </ivy-module>
