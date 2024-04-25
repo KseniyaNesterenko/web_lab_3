@@ -164,18 +164,18 @@
         </svn>
     </target>
 
-    <!-- Задача для добавления и коммита отчета в Git (todo: протестировать)-->
+    <!-- Задача для добавления и коммита отчета в Git (done)-->
     <target name="report" depends="test">
         <mkdir dir="${junit.output.dir}"/>
 
         <!-- Добавить отчетов JUnit в Git -->
-        <exec executable="${git.executable}">
+        <exec executable="git">
             <arg value="add"/>
             <arg value="${junit.output.dir}/TEST-*.xml"/>
         </exec>
 
         <!-- Коммит -->
-        <exec executable="${git.executable}">
+        <exec executable="git">
             <arg value="commit"/>
             <arg value="-m"/>
             <arg value="Отчёт тестов JUnit"/>
