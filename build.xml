@@ -123,37 +123,70 @@
 
     <!-- Цель для взаимодействия с svn (done)-->
     <target name="team" depends="build">
-        <exec executable="svn">
-            <arg line="update"/>
+
+        <exec executable="git">
+            <arg line="branch"/>
+            <arg line="rev1"/>
+            <arg line="HEAD~1"/>
         </exec>
 
-        <exec executable="svn">
+        <exec executable="git">
             <arg line="checkout"/>
-            <arg line="${svn.repository.url}"/>
-            <arg line="--revision"/>
-            <arg line="HEAD:1"/>
-            <arg line="revision1"/>
+            <arg line="rev1"/>
+        </exec>
+
+        <exec executable="git">
+            <arg line="clone"/>
+            <arg line="--branch"/>
+            <arg line="rev1"/>
+            <arg line="--single-branch"/>
+            <arg line="."/>
+            <arg line="${dir.build.team}/rev1"/>
         </exec>
 
         <antcall target="build">
             <param name="dir.src" value="${dir.build.team}/rev1"/>
-            <param name="jar.file" value="${dir.build.team}/revision1.jar"/>
+            <param name="jar.file" value="${dir.build.team}/rev1.jar"/>
             <param name="build" value="${dir.build.team}"/>
         </antcall>
 
-        <exec executable="svn">
+        <exec executable="git">
+            <arg line="branch"/>
+            <arg line="rev2"/>
+            <arg line="HEAD~2"/>
+        </exec>
+
+        <exec executable="git">
             <arg line="checkout"/>
-            <arg line="${svn.repository.url}"/>
-            <arg line="--revision"/>
-            <arg line="HEAD:2"/>
-            <arg line="revision2"/>
+            <arg line="rev2"/>
+        </exec>
+
+        <exec executable="git">
+            <arg line="clone"/>
+            <arg line="--branch"/>
+            <arg line="rev2"/>
+            <arg line="--single-branch"/>
+            <arg line="."/>
+            <arg line="${dir.build.team}/rev2"/>
         </exec>
 
         <antcall target="build">
             <param name="dir.src" value="${dir.build.team}/rev2"/>
-            <param name="jar.file" value="${dir.build.team}/revision2.jar"/>
+            <param name="jar.file" value="${dir.build.team}/rev2.jar"/>
             <param name="build" value="${dir.build.team}"/>
         </antcall>
+
+<!--        <exec executable="git">-->
+<!--            <arg line="checkout"/>-->
+<!--            <arg line="HEAD-2"/>-->
+<!--            <arg line="${dir.build.team}/revision2"/>-->
+<!--        </exec>-->
+
+<!--        <antcall target="build">-->
+<!--            <param name="dir.src" value="${dir.build.team}/revision2"/>-->
+<!--            <param name="jar.file" value="${dir.build.team}/revision2.jar"/>-->
+<!--            <param name="build" value="${dir.build.team}"/>-->
+<!--        </antcall>-->
 
         <zip destfile="${zip.file}">
             <fileset dir="${dir.build.team}" includes="**/*.jar"/>
