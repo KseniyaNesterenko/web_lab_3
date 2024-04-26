@@ -124,6 +124,18 @@
     <!-- Цель для взаимодействия с svn (done)-->
     <target name="team" depends="build">
 
+        <exec executable="git" failonerror="false">
+            <arg line="branch"/>
+            <arg line="-D"/>
+            <arg line="rev1"/>
+        </exec>
+
+        <exec executable="git" failonerror="false">
+            <arg line="branch"/>
+            <arg line="-D"/>
+            <arg line="rev2"/>
+        </exec>
+
         <exec executable="git">
             <arg line="branch"/>
             <arg line="rev1"/>
@@ -191,6 +203,11 @@
         <zip destfile="${zip.file}">
             <fileset dir="${dir.build.team}" includes="**/*.jar"/>
         </zip>
+
+        <exec executable="git">
+            <arg line="checkout"/>
+            <arg line="main"/>
+        </exec>
     </target>
 
     <!-- Цель для определения измененных файлов (done)-->
